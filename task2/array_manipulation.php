@@ -46,4 +46,20 @@ $produkti = [
     ]
 ];
 
+function filterFunc($item,$key){
+
+    if($item["vid"] == "zelencuk")
+        return $key;
+    elseif($item["vid"] == "ovosje")
+        return $item["cena"] < 10;
+    else{
+        return !strcasecmp($key[0], "k");
+    }
+
+}
+
+$output = array_filter($produkti, "filterFunc",ARRAY_FILTER_USE_BOTH);
+
+print_r($output);
+
 

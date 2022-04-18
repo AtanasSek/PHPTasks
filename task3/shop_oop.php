@@ -19,11 +19,19 @@ class Product
      * @param  string  $name
      * @param  float  $price
      */
-    public function __construct(
-        public int $id,
-        public string $name,
-        public float $price
-    ) {}
+    public int $id;
+    public string $name;
+    public float $price;
+
+    public function __construct(int $id, string $name,float $price) {
+        $this->id = $id;
+        $this->name = $name;
+        $this->price = $price;
+    }
+
+    public function __toString(){
+        return $this->id."\n".$this->name."\n".$this->price;
+    }
 }
 
 class Cart
@@ -31,9 +39,12 @@ class Cart
     /**
      * @param  Product[] $products
      */
-    public function __construct(
-        private array $products
-    ) {}
+
+    private array $products;
+    public function __construct(array $products) {
+        $this->products = $products;
+
+    }
 
     /**
      * Sort the products in the cart in descending order by price
@@ -42,7 +53,24 @@ class Cart
      */
     public function sortByPrice(): void
     {
+        usort($this->products, function($item1,$item2){
+            return $item1->price > $item2->price ? -1:1;
+        });
+    }
 
+    public function removeProduct($index){
+        unset($this->products[$index]);
+    }
+
+
+
+    public function getProducts(){
+        return $this->products;
+    }
+
+    public function setProducts($array){
+        $this->products = $array;
+        $this->sortByPrice();
     }
 }
 
@@ -53,17 +81,40 @@ class Buyer
      * @param  Cart  $cart
      * @param  float  $money
      */
-    public function __construct(
-        public string $name,
-        public Cart $cart,
-        private float $money
-    ) {}
+
+    public string $name;
+    public Cart $cart;
+    private float $money;
+
+    public function __construct(string $name, Cart $cart, float $money) {
+        $this->name = $name;
+        $this->cart = $cart;
+        $this->money = $money;
+    }
 
     /**
      * @return void
      */
+
+    //Se kupuvaat produkti po opagjacki redosled i koga ke nema dovolno pari za prviot proizvod, go preskoknuva i go kupuva sledniot,
+    //dokolku ovaa logika sakame da ja smenime, namesto continue vo sledniot foreach, ke ima break.
     public function buyProducts(): void
     {
+        $tempArray = $this->cart->getProducts();
+
+        for($i = 0; $i < count($tempArray); $i++){
+            if($this->cart->getProducts()[$i]->price > $this->money){
+                continue;
+            }
+            else {
+
+                $this->money -= $this->cart->getProducts()[$i]->price;
+                $this->cart->removeProduct($i);
+
+            }
+        }
+
+        $this->money = round($this->money,2); //floating precision error, mora ovaka.
 
     }
 
@@ -72,6 +123,13 @@ class Buyer
      */
     public function printRemainingCartProducts(): void
     {
+        //print_r($this->cart->getProducts());
+        $tempArray = $this->cart->getProducts();
+        echo "Leftover products";
+
+        foreach ($tempArray as $product){
+            echo "\nID:".$product->id."\nName:".$product->name."\nPrice: ".$product->price."\n--------";
+        }
 
     }
 
@@ -80,7 +138,11 @@ class Buyer
      */
     public function printRemainingMoney(): void
     {
+        echo "\nLeftover money: ".$this->money;
+    }
 
+    public function addProducts($array){
+        $this->cart->setProducts($array);
     }
 }
 
@@ -94,6 +156,7 @@ $products = [
 
 $buyer = new Buyer("John", new Cart([]), 43.99);
 
+$buyer->addProducts($products);
 
 /**
  * Results
@@ -101,6 +164,5 @@ $buyer = new Buyer("John", new Cart([]), 43.99);
 $buyer->buyProducts();
 $buyer->printRemainingCartProducts();
 $buyer->printRemainingMoney();
-
 
 

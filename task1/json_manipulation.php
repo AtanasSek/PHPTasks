@@ -12,3 +12,22 @@
  */
 
 $json = '[{"name":"eggs", "price":1}, {"name":"Sugar", "price":4.04}, {"name":"coffee", "price":9.99}, {"name":"rice", "price":4.04}]';
+
+function sortFunction($item1 , $item2){
+
+    if($item1->price == $item2->price){
+        return strcasecmp($item1->name,$item2->name); // non case sensitive
+    }
+    else{
+        return $item1->price > $item2->price ? -1:1;
+    }
+}
+
+$jsonArray = json_decode($json);
+usort($jsonArray, "sortFunction");
+
+$output = json_encode($jsonArray,JSON_PRETTY_PRINT);
+
+echo $output;
+
+?>
